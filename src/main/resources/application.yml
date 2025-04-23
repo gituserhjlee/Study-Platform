@@ -1,0 +1,29 @@
+server:
+  port: 8080  # 서버 포트 설정 (기본 포트는 8080)
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;  # H2 데이터베이스 연결 (테스트용)
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      maximumPoolSize: 10  # HikariCP 최대 연결 수
+  security:
+    user:
+      name: user
+      password: password
+  jwt:
+    secret: "secret-key"  # JWT 서명 키
+    expiration: 86400000  # 1일 (밀리초 단위)
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # 데이터베이스 자동 업데이트
+    show-sql: true  # SQL 쿼리 출력
+
+  h2:
+    console:
+      enabled: true  # H2 콘솔 활성화 (http://localhost:8080/h2-console에서 사용 가능)
+      path: /h2-console
+
