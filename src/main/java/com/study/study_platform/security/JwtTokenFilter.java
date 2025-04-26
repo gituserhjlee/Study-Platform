@@ -8,9 +8,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.util.Collections;
 
+@Component
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
@@ -23,6 +26,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        // 로그인 요청에는 필터를 적용하지 않음
+        if (request.getRequestURI().equals("/api/auth/login")) {
+            filterChain.doFilter(request, response);  // 로그인 요청은 필터를 건너뜀
+            return;
+        }
+
         // 요청 헤더에서 JWT 토큰 추출
         String token = getJwtFromRequest(request);
 
@@ -31,7 +40,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
             // 인증 객체 생성
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(username, null, null);
+                    new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
 
             // Spring Security Context에 인증 정보 설정
             SecurityContextHolder.getContext().setAuthentication(authentication);

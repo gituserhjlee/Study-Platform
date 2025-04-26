@@ -1,6 +1,7 @@
 package com.study.study_platform.security;
 
 import io.jsonwebtoken.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -11,7 +12,8 @@ public class JwtTokenUtil {
     private String secretKey = "secret-key"; // 보안 키 (환경 변수나 별도의 설정 파일에서 관리해야 합니다)
 
     // JWT 생성
-    public String generateToken(String username) {
+    public String generateToken(Authentication authentication) {
+        String username = authentication.getName();
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
