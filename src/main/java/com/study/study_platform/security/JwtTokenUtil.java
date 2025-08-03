@@ -13,6 +13,8 @@ public class JwtTokenUtil {
 
     // JWT 생성
     public String generateToken(Authentication authentication) {
+        System.out.println("JWT 생성");
+
         String username = authentication.getName();
         return Jwts.builder()
                 .setSubject(username)
