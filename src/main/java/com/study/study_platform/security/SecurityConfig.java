@@ -20,8 +20,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        System.out.println("필터체인 시작");
-
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // 프레임 허용
@@ -43,9 +41,9 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /*@Bean
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-    }*/
+    }
 
 }

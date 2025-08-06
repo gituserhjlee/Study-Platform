@@ -24,8 +24,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("인터널 필터 시작");
-
         // 로그인 요청에는 필터를 적용하지 않음
         if (request.getRequestURI().equals("/api/auth/login")) {
             filterChain.doFilter(request, response);  // 로그인 요청은 필터를 건너뜀
@@ -34,7 +32,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         // 요청 헤더에서 JWT 토큰 추출
         String token = getJwtFromRequest(request);
-        System.out.println("추출완료");
 
         if (token != null && jwtTokenUtil.validateToken(token)) {
             String username = jwtTokenUtil.getUsernameFromToken(token);

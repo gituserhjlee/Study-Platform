@@ -6,20 +6,25 @@ import com.study.study_platform.exception.DuplicateIdException;
 import com.study.study_platform.repository.MemberRepository;
 import com.study.study_platform.security.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class MemberService {
+public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final JwtTokenUtil jwtTokenUtil;
+//    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+//    private final AuthenticationManager authenticationManager;
+//    private final JwtTokenUtil jwtTokenUtil;
 
     public SignUpResponseDto signup(SignUpRequestDto signupRequestDto) {
         String id  = signupRequestDto.getId();
@@ -36,13 +41,14 @@ public class MemberService {
         return new SignUpResponseDto(member.getId(), member.getUsername(), member.getRole());
     }
 
-    public LoginResponseDto login(LoginRequestDto loginRequestDto){
+    /*public LoginResponseDto login(LoginRequestDto loginRequestDto){
         // Authentication 객체 생성
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginRequestDto.getId(), passwordEncoder.encode(loginRequestDto.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequestDto.getId(), loginRequestDto.getPassword());
 
         // 인증
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+//        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
         // 인증이 성공하면 SecurityContext에 저장
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -56,6 +62,10 @@ public class MemberService {
 
         // 응답으로 JWT와 사용자 정보 (이름, Role 등) 제공
         return new LoginResponseDto(jwtToken, member.getUsername(), role);
-    }
+    }*/
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return memberRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+    }
 }
