@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
@@ -19,6 +21,7 @@ import java.util.Collections;
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
+    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -36,9 +39,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (token != null && jwtTokenUtil.validateToken(token)) {
             String username = jwtTokenUtil.getUsernameFromToken(token);
 
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
             // 인증 객체 생성
             UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
             // Spring Security Context에 인증 정보 설정
             SecurityContextHolder.getContext().setAuthentication(authentication);

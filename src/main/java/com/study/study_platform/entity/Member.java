@@ -46,4 +46,9 @@ public class Member implements UserDetails {
     public String getPassword(){
         return this.password;
     }
+
+    @Override
+    public String getUsername(){
+        return this.id;
+    }
 }

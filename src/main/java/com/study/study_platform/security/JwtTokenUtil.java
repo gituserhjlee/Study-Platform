@@ -1,5 +1,6 @@
 package com.study.study_platform.security;
 
+import com.study.study_platform.entity.Member;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
@@ -16,11 +17,10 @@ public class JwtTokenUtil {
 
     // JWT 생성
     public String generateToken(Authentication authentication) {
-        System.out.println("JWT 생성");
-
-        String username = authentication.getName();
+        Member member = (Member) authentication.getPrincipal();
+        String id = member.getId();
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(id)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 만료 시간 1일
                 .signWith(key, SignatureAlgorithm.HS512)

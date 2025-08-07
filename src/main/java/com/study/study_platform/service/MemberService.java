@@ -22,9 +22,6 @@ import org.springframework.stereotype.Service;
 public class MemberService implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-//    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-//    private final AuthenticationManager authenticationManager;
-//    private final JwtTokenUtil jwtTokenUtil;
 
     public SignUpResponseDto signup(SignUpRequestDto signupRequestDto) {
         String id  = signupRequestDto.getId();
@@ -41,31 +38,8 @@ public class MemberService implements UserDetailsService {
         return new SignUpResponseDto(member.getId(), member.getUsername(), member.getRole());
     }
 
-    /*public LoginResponseDto login(LoginRequestDto loginRequestDto){
-        // Authentication 객체 생성
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginRequestDto.getId(), loginRequestDto.getPassword());
-
-        // 인증
-//        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-
-        // 인증이 성공하면 SecurityContext에 저장
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // JWT 토큰 생성
-        String jwtToken = jwtTokenUtil.generateToken(authentication);
-
-        // 인증된 사용자 정보
-        Member member = (Member) authentication.getPrincipal();
-        String role = member.getRole().name();  // 사용자의 Role 정보
-
-        // 응답으로 JWT와 사용자 정보 (이름, Role 등) 제공
-        return new LoginResponseDto(jwtToken, member.getUsername(), role);
-    }*/
-
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return memberRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
+        return memberRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }
