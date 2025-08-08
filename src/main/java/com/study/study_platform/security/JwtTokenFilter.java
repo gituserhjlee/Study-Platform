@@ -1,12 +1,11 @@
 package com.study.study_platform.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
@@ -24,12 +22,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 로그인 요청에는 필터를 적용하지 않음
-        if (request.getRequestURI().equals("/api/auth/login")) {
-            filterChain.doFilter(request, response);  // 로그인 요청은 필터를 건너뜀
+        // 로그인/회원가입 요청에는 필터를 적용하지 않음
+        String uri = request.getRequestURI();
+        if ("/api/auth/login".equals(uri) || "/api/auth/signup".equals(uri)) {
+            filterChain.doFilter(request, response);  // 인증 필요 없는 엔드포인트는 필터 건너뜀
             return;
         }
 
@@ -39,7 +38,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (token != null && jwtTokenUtil.validateToken(token)) {
             String username = jwtTokenUtil.getUsernameFromToken(token);
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username); //사용자정보 조회
 
             // 인증 객체 생성
             UsernamePasswordAuthenticationToken authentication =

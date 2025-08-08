@@ -16,7 +16,7 @@ import java.util.List;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 기본 생성자 추가
-public class Member implements UserDetails {
+public class Member implements UserDetails {//UserDetails 인터페이스 구현
     @Id
     private String id;
     private String username;
@@ -50,5 +50,10 @@ public class Member implements UserDetails {
     @Override
     public String getUsername(){
         return this.id;
+    }
+
+    // 화면 표시용 사용자명 반환자(혼동 방지를 위해 별도 제공)
+    public String getDisplayUsername() {
+        return this.username;
     }
 }

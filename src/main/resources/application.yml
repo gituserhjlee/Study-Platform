@@ -14,7 +14,7 @@ spring:
       name: user
       password: password
   jwt:
-    secret: "secret-key"  # JWT 서명 키
+    secret: "change-me-to-a-long-and-random-secret-key-of-at-least-64-characters-0123456789ABCDEFG"  # JWT 서명 키 (HS512 권장 64바이트 이상)
     expiration: 86400000  # 1일 (밀리초 단위)
 
   jpa:

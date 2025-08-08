@@ -40,10 +40,10 @@ public class AuthController {
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(loginRequestDto.getId(), loginRequestDto.getPassword());
 
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);//인증수행. memberService에서 정의한 loadUserByUsername 메서드 호출
+            SecurityContextHolder.getContext().setAuthentication(authentication);//인증성공시 인증정보를 저장
 
-            String jwtToken = jwtTokenUtil.generateToken(authentication);
+            String jwtToken = jwtTokenUtil.generateToken(authentication);//jwt토큰생성
 
             Member member = (Member) authentication.getPrincipal();
             String role = member.getRole().name();
