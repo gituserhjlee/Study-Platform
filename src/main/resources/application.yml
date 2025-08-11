@@ -27,3 +27,18 @@ spring:
       enabled: true  # H2 콘솔 활성화 (http://localhost:8080/h2-console에서 사용 가능)
       path: /h2-console
 
+  # Redis 설정
+  data:
+    redis:
+      host: localhost  # Redis 서버 주소
+      port: 6379       # Redis 포트 (기본값)
+      timeout: 2000    # 연결 타임아웃 (밀리초)
+      database: 0      # 사용할 데이터베이스 번호 (0-15)
+      lettuce:
+        pool:
+          max-active: 8    # 최대 활성 연결 수
+          max-idle: 8      # 최대 유휴 연결 수
+          min-idle: 0      # 최소 유휴 연결 수
+          max-wait: -1     # 연결 대기 시간 (-1은 무한 대기)
+      # Redis 연결 실패 시 애플리케이션 시작 허용
+      connect-timeout: 5000
