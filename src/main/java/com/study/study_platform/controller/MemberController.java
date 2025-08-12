@@ -2,9 +2,11 @@ package com.study.study_platform.controller;
 
 import com.study.study_platform.dto.MemberInfoDto;
 import com.study.study_platform.dto.ResponseDto;
-import com.study.study_platform.entity.Member;
+import com.study.study_platform.service.MemberService;
+import com.study.study_platform.service.RedisService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,18 +14,32 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/member")
 @RequiredArgsConstructor
-
 public class MemberController {
 
-    @GetMapping("/me")
-    public ResponseDto<MemberInfoDto> getMyInfo(@AuthenticationPrincipal Member member) {
-        if (member == null) {
-            return new ResponseDto<>(false, "로그인 정보가 없습니다.", null);
-        }
+    private final MemberService memberService;
+    private final RedisService redisService;
 
-        MemberInfoDto data = new MemberInfoDto(member.getId(), member.getDisplayUsername(), member.getRole());
-        return new ResponseDto<>(true, "내 정보 조회 성공", data);
+    @GetMapping("/info")
+    public ResponseDto getMemberInfo() {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String id = authentication.getName();
+            MemberInfoDto memberInfoDto = memberService.getMemberInfo(id);
+            return new ResponseDto(true, "회원 정보 조회 성공", memberInfoDto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseDto(false, "회원 정보 조회 실패", null);
+        }
     }
 
-
+    @GetMapping("/online-count")
+    public ResponseDto getOnlineUsersCount() {
+        try {
+            Long count = redisService.getOnlineUsersCount();
+            return new ResponseDto(true, "온라인 사용자 수 조회 성공", count);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseDto(false, "온라인 사용자 수 조회 실패", null);
+        }
+    }
 }

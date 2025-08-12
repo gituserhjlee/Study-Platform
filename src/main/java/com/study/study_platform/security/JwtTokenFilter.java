@@ -1,5 +1,7 @@
 package com.study.study_platform.security;
 
+import com.study.study_platform.exception.TokenBlacklistedException;
+import com.study.study_platform.service.RedisService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,14 +22,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
     private final UserDetailsService userDetailsService;
+    private final RedisService redisService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 로그인/회원가입 요청에는 필터를 적용하지 않음
+        // 로그인/회원가입/로그아웃 요청에는 필터를 적용하지 않음
         String uri = request.getRequestURI();
-        if ("/api/auth/login".equals(uri) || "/api/auth/signup".equals(uri)) {
+        if ("/api/auth/login".equals(uri) || "/api/auth/signup".equals(uri) || "/api/auth/logout".equals(uri)) {
             filterChain.doFilter(request, response);  // 인증 필요 없는 엔드포인트는 필터 건너뜀
             return;
         }
@@ -36,6 +39,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         String token = getJwtFromRequest(request);
 
         if (token != null && jwtTokenUtil.validateToken(token)) {
+            // Redis 블랙리스트 확인
+            if (redisService.isBlacklisted(token)) {
+                // 블랙리스트된 토큰이면 인증하지 않고 다음 필터로 전달
+                filterChain.doFilter(request, response);
+                return;
+            }
+            
             String username = jwtTokenUtil.getUsernameFromToken(token);
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(username); //사용자정보 조회

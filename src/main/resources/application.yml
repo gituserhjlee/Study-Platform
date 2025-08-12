@@ -1,5 +1,9 @@
 server:
   port: 8080  # 서버 포트 설정 (기본 포트는 8080)
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
 
 spring:
   datasource:

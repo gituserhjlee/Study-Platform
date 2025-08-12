@@ -4,6 +4,7 @@ import com.study.study_platform.dto.*;
 import com.study.study_platform.entity.Member;
 import com.study.study_platform.security.JwtTokenUtil;
 import com.study.study_platform.service.MemberService;
+import com.study.study_platform.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +23,7 @@ public class AuthController {
     private final MemberService memberService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
+    private final RedisService redisService;
 
     @PostMapping("/signup")
     public ResponseDto signup(@RequestBody SignUpRequestDto signupRequestDto) {
@@ -48,6 +50,9 @@ public class AuthController {
             Member member = (Member) authentication.getPrincipal();
             String role = member.getRole().name();
 
+            // 온라인 사용자 수 증가
+            redisService.incrementOnlineUsers();
+
             LoginResponseDto loginResponseDto = new LoginResponseDto(jwtToken, member.getUsername(), role);
             return new ResponseDto(true, "로그인 성공", loginResponseDto);
 
@@ -56,5 +61,35 @@ public class AuthController {
             return new ResponseDto(false, "아이디 또는 비밀번호가 잘못되었습니다.", null);
         }
 
+    }
+
+    @PostMapping("/logout")
+    public ResponseDto logout(@RequestBody LogoutRequestDto logoutRequestDto) {
+        try {
+            String token = logoutRequestDto.getToken();
+            
+            // 토큰 유효성 검사
+            if (token == null || !jwtTokenUtil.validateToken(token)) {
+                return new ResponseDto(false, "유효하지 않은 토큰입니다.", null);
+            }
+            
+            // 토큰 만료 시간 계산 (현재 시간부터 토큰 만료까지)
+            long expirationTime = jwtTokenUtil.getExpirationDateFromToken(token).getTime() - System.currentTimeMillis();
+            
+            // Redis 블랙리스트에 토큰 추가
+            redisService.addToBlacklist(token, expirationTime);
+            
+            // 온라인 사용자 수 감소
+            redisService.decrementOnlineUsers();
+            
+            // Spring Security Context에서 인증 정보 제거
+            SecurityContextHolder.clearContext();
+            
+            return new ResponseDto(true, "로그아웃 성공", null);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseDto(false, "로그아웃 실패", null);
+        }
     }
 }

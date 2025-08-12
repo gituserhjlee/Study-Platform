@@ -42,4 +42,10 @@ public class MemberService implements UserDetailsService {
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
         return memberRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
+
+    public MemberInfoDto getMemberInfo(String id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+        return new MemberInfoDto(member.getId(), member.getUsername(), member.getRole());
+    }
 }
